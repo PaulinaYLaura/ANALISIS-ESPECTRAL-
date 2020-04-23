@@ -32,7 +32,7 @@ class Biosenal(object):  # Se crea la clase Biosenal en Modelo
             self.__canales=0
             self.__puntos=0# Este modelo tendrá un nuevo array con sus respectivos canales y puntos       
             
-    def asignarDatos(self,data):  
+    def asignarDatos(self,data):  #en este caso la señal que usamos  solo tiene un canal
         self.__data=data
         self.__canales= 1
         self.__puntos=data.shape[0]
@@ -50,15 +50,16 @@ class Biosenal(object):  # Se crea la clase Biosenal en Modelo
     
     # permite devolver el canal con los xlim del sistema  (limites)
     
-    def calcularWavelet(self,data,fs):
+    def calcularWavelet(self,data,fs): #funcion que realiza todo el proceso de analisis espectral por wavelet
         
         senal =self.__data[:]
+        sen= senal - np.mean(senal)
         
         
-        #%%analisis usando wavelet continuo
-        import pywt #1.1.1
+        
+        import pywt #se importa la libreria
 
-        #%%
+        
         sampling_period =  1/fs
         Frequency_Band = [4, 30] # Banda de frecuencia a analizar
         
@@ -70,8 +71,8 @@ class Biosenal(object):  # Se crea la clase Biosenal en Modelo
         # Extraer las escalas correspondientes a la banda de frecuencia a analizar
         scales = scales[(frequencies >= Frequency_Band[0]) & (frequencies <= Frequency_Band[1])]
         
-        N = senal.shape[0]
-        #%%
+        N = sen.shape[0]
+        
         # Obtener el tiempo correspondiente a una epoca de la señal (en segundos)
         time_epoch = sampling_period*N
 
@@ -80,34 +81,40 @@ class Biosenal(object):  # Se crea la clase Biosenal en Modelo
         time = np.arange(0, time_epoch, sampling_period)
         # Para la primera epoca del segundo montaje calcular la transformada continua de Wavelet, usando Complex Morlet Wavelet
 
-        [coef, freqs] = pywt.cwt(senal, scales, 'cmor', sampling_period)
+        [coef, freqs] = pywt.cwt(sen, scales, 'cmor', sampling_period)
         # Calcular la potencia 
         power = (np.abs(coef)) ** 2
         
         return time, freqs, power
+#%%analisis usando multitaper        
         
+    def calcularWelch(self,data,fm,ta,so,po): #funcion para ejecutar el codigo del welch sobre la señal
         
-    def calcularWelch(self,data,fm,ta,so,po):
+        data = self.__data[:]
+        sen = data-np.mean(data)
         
-        senal =self.__data[:]
-        f, Pxx = signal.welch(senal,fm,'hamming', ta, so, po, scaling='density');
-        return f, Pxx
+        f, Pxx = signal.welch(sen,fm,'hamming', ta, so, po, scaling='density');# welch
+        return f, Pxx #devolver los datos necesarios para graficarla
         
         
 
-    def calcularMultitaper(self,data,fmp,ab,tam):
+    def calcularMultitaper(self,data,fmp,ab,tam,inicial,final): #funcion para ejecutar el codigo del multitaper
         
-        from chronux.mtspectrumc import mtspectrumc
-        senal =self.__data[:]
-        params = dict(fmp = fmp, fpass = [0, 50], tapers = [ab, tam, 1], trialave = 1)
+        data =self.__data[:]
+        
+        sen= data - np.mean(data)
+        
+        from chronux.mtspectrumc import mtspectrumc # se importa la liberia necesaria para su ejecucion
+        
+        params = dict(fmp = fmp, fpass = [inicial, final], tapers = [ab, tam, 1], trialave = 1) # en esta variable queda los datos del multitaper
+
+        data = np.reshape(sen,(fmp*5,10),order='F') #esta variable reliza un redimension de los datos
+
+#Calculate the spectral power of the data
+        Pxx, f = mtspectrumc(data, params) # se gurada en esta variables los datos resultado del mtspectrum 
         #A numeric vector [W T p] where W is the
         #bandwidth, T is the duration of the data and p 
         #is an integer such that 2TW-p tapers are used.
-
-        dato = np.reshape(senal,(fmp*5,10),order='F')
-        #Calculate the spectral power of the data
-        Pxx, f = mtspectrumc(dato, params)
-        return Pxx,f
+        return Pxx, f # se envian para ser graficados o utilizados donde se llamen
         
    
-    

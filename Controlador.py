@@ -44,15 +44,15 @@ class Coordinador(object):
         return self.__mi_biosenal.devolver_segmento(x_min,x_max)
 
     
-    def calcularWavelet(self,data,fs):
+    def calcularWavelet(self,data,fs):# ests funcion permite enviar los datos necesraios al modelo para el calculo del wavelet
         return self.__mi_biosenal.calcularWavelet(data,fs)
     
-    def calcularWelch(self,data,fm,ta,so,po):
+    def calcularWelch(self,data,fm,ta,so,po): # esta funcion permite enviar los datos necesraios al modelo para el calculo del welch
         return self.__mi_biosenal.calcularWelch(data,fm,ta,so,po)
         
         
-    def calcularmulti(self,data,fmp,ab,tam):
-        return self.__mi_biosenal.calcularMultitaper(data,fmp,ab,tam)
+    def calcularmulti(self,data,fmp,ab,tam,inicial,final):# esta funcion permite enviar los datos necesraios al modelo para el calculo del multitaper
+        return self.__mi_biosenal.calcularMultitaper(data,fmp,ab,tam,inicial,final)
     
     
     

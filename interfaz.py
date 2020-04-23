@@ -5,7 +5,7 @@ autores: Laura Marcela Berrio, Maria Paulina Salazar Meneses"""
 
 
 
-# EN ESTE CÃ“DIGO SE INCLUYE TODO LO QUE ESTE RELACIONADO CON LA INFORMACIÃ“N QUE SE RECIBE Y SE LE DA AL USUARIO 
+# EN ESTE CODIGO SE INCLUYE TODO LO QUE ESTE RELACIONADO CON LA INFORMACION QUE SE RECIBE Y SE LE DA AL USUARIO 
 import sys # LibrerÃ­a que proporciona parÃ¡metros y funciones especÃ­ficas del sistema
 #Qfiledialog es una ventana para abrir y guardar archivos
 #Qvbox es un organizador de widget en la ventana, este en particular los apila en vertical
@@ -69,17 +69,17 @@ class MyGraphCanvas(FigureCanvas):
         
     
         
-    #Se ingresan los datos a graficar y se grafican
+#Se ingresan los datos a graficar y se grafican
 
- #Se grafican las seÃ±ales en un mismo plano de forma que no queden superpuestas, 
+  
  #cuando se utiliza plot las seÃ±ales quedan en la misma grÃ¡fica
  
     # Se crea un metodo para graficar lo que se desee
         
-    def graficar_senal(self,datos):
+    def graficar_senal(self,datos): # funcion en la interfaz para graficar la señal cargada
         self.axes.clear()
         #Se ingresan los datos a graficar y se grafican
-        self.axes.plot(datos)
+        self.axes.plot(datos) 
         print("datos")
         print(datos)
    
@@ -92,31 +92,31 @@ class MyGraphCanvas(FigureCanvas):
         
         
         
-    def graficar_espectro(self,time, freqs, power):
-        self.axes.clear()
+    def graficar_espectro(self,time, freqs, power): # la funcion para graficar el espectro del wavelet
+        self.axes.clear() # se limpia el espacio antes de graficar
         self.axes.contourf(time,
-                 freqs[(freqs >= 4) & (freqs <= 40)],
+                 freqs[(freqs >= 4) & (freqs <= 40)], #anchos de frecuencias en los cuales se va a analizar
                  power[(freqs >= 4) & (freqs <= 40),:],
                  20, # Especificar 20 divisiones en las escalas de color 
                  extend='both')
         print("datos")
-        self.axes.set_ylabel('frequency [Hz]')
+        self.axes.set_ylabel('frequency [Hz]') #nombre de los ejes
         self.axes.set_xlabel('Time [s]')
         self.axes.figure.canvas.draw()#ordenamos que dibuje
         
-    def graficar_analisisw(self,f,Pxx):
-        #self.axes.clear()
-        self.axes.plot(f[(f >= 4) & (f <= 40)],Pxx[(f >= 4) & (f <= 40)])
-        self.axes.set_ylabel('frequency [Hz]')
-        self.axes.set_xlabel('Time [s]')
+    def graficar_analisisw(self,f,Pxx): #esta funcion recibe los datos del modelo para graficar el welch
+        self.axes.clear()
+        self.axes.plot(f[(f >= 4) & (f <= 40)],Pxx[(f >= 4) & (f <= 40)]) # rango de frecuencias a analizar 
+        self.axes.set_xlabel('frequency [Hz]')
+        
         self.axes.figure.canvas.draw()#ordenamos que dibuje
         
-    def graficar_analisisp(self,Pxx,f):
+    def graficar_analisisp(self,Pxx,f): # esta funcion recibe del modelo los datos para graficar por el metodo multitaper
+        self.axes.clear()
+        self.axes.plot(f[(f >= 4) & (f <= 40)],Pxx[(f >= 4) & (f <= 40)]) # rango de frecuencias a analizar
+        self.axes.set_xlabel('frequency [Hz]')
         
-        self.axes.plot(f[(f >= 4) & (f <= 40)],Pxx[(f >= 4) & (f <= 40)])
-        self.axes.set_ylabel('frequency [Hz]')
-        self.axes.set_xlabel('Time [s]')
-        self.axes.figure.canvas.draw()
+        self.axes.figure.canvas.draw() # se ordena que grafique
 
 #signal.welch(x, fs=1.0, window='hann', nperseg=None, noverlap=None, nfft=None, 
 #detrend='constant', return_onesided=True, scaling='density', axis=-1)
@@ -125,7 +125,7 @@ class MyGraphCanvas(FigureCanvas):
    
     
         
-                 
+#la siguiente clase se encarga de todos los comandos instituidos en la interfaz grafica                 
        
 class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ¡ficas, ventana principal
     #constructor
@@ -149,8 +149,10 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
         self.campo_w.setLayout(layout2)
         
         #se crea un objeto para manejo de graficos
-        self.__sc = MyGraphCanvas(self.campo_graficacion, width=5, height=4, dpi=100)
-        self.__sc2 = MyGraphCanvas(self.campo_w, width=5, height=4, dpi=100)
+        self.__sc = MyGraphCanvas(self.campo_graficacion, width=5, height=4, dpi=100) # para el primer grafico
+        self.__sc2 = MyGraphCanvas(self.campo_w, width=5, height=4, dpi=100) #
+        
+        
         
         #se aÃ±ade el campo de graficos
         layout.addWidget(self.__sc)
@@ -175,6 +177,7 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
         self.boton_atras.setEnabled(True)
         
         # El botÃ³n seleccionar canal no esta disponible si el usuario no ha cargado la seÃ±al
+          # La funciÃ³n QFileDialog muestra el cuadro de diÃ¡logo para seleccionar la seÃ±al que se quiere cargar 
         
         #los botones, checkbox y combobox para el analisis espectral
         self.checkWelch.stateChanged.connect(self.cambio)
@@ -185,88 +188,89 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
     
         
     
-    def cambio(self):
+    def cambio(self):# funcion para habilitar los botones check en la interfaz para el welch y para el multitaper
         
         if self.checkWelch.isChecked() == True:
             
             self.checkMulti.setEnabled(False) #por orden y evitar seleccionar las dos opciones al tiempo
             self.fs_multi.setEnabled(False)
-            self.w.setEnabled(False)
-            self.T.setEnabled(False)
+            self.we.setEnabled(False)
+            self.tama.setEnabled(False)
+            self.ini.setEnabled(False)
+            self.fin.setEnabled(False)
            
         
-        if self.checkMulti.isChecked() == True:
+        if self.checkMulti.isChecked() == True: #por orden y evitar seleccionar las dos opciones al tiempo
             
             self.checkWelch.setEnabled(False)
             self.tipo_ventana.setEnabled(False)
             self.tamano.setEnabled(False)
             self.solapamiento.setEnabled(False)
             self.frecuencia_w.setEnabled(False)
+            self.potencia.setEnabled(False)
             
-        if self.checkWelch.isChecked() == False:
+        if self.checkWelch.isChecked() == False:#por orden y evitar seleccionar las dos opciones al tiempo
             
             self.checkMulti.setEnabled(True)
             self.fs_multi.setEnabled(True)
-            self.w.setEnabled(True)
-            self.T.setEnabled(True)
+            self.we.setEnabled(True)
+            self.tama.setEnabled(True)
+            self.ini.setEnabled(True)
+            self.fin.setEnabled(True)
             
-        if self.checkMulti.isChecked() == False:
+        if self.checkMulti.isChecked() == False:#por orden y evitar seleccionar las dos opciones al tiempo
             
             self.checkWelch.setEnabled(True)
             self.tipo_ventana.setEnabled(True)
             self.tamano.setEnabled(True)
             self.solapamiento.setEnabled(True)
             self.frecuencia_w.setEnabled(True)
+            self.potencia.setEnabled(True)
         
    
         
-            
-        
-       
-    #def graficar_canal(self): # FunciÃ³n que selecciona el canal
-        #canal = int (self.campo.text())  # se ingresa el canal en el campo canal. Ese campo es una cadena entonces debe convertirse en entero
-        
-        #self.__sc.graficar_senal(self.__coordinador.devolver_canal(canal,self.__x_min,self.__x_max))
-            
         
       
         
         #cuando se cargue la seÃ±al se debe volver a habilitarlos
-    def asignar_Controlador(self,controlador):
+    def asignar_Controlador(self,controlador): #envia la informacion al coordinador 
         self.__coordinador=controlador
-    def adelante_senal(self):
+    def adelante_senal(self):  # fucnion para delantar la senal dosmil puntos
         self.__x_min=self.__x_min+2000
         self.__x_max=self.__x_max+2000
-        self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min,self.__x_max))
+        self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min,self.__x_max)) #le lleva la informacion del movimiento a la senal
             
-    def atrasar_senal(self):
+    def atrasar_senal(self):# fucnion para retroceder la senal dosmil puntos
         #que se salga de la rutina si no puede atrazar
         if self.__x_min<2000:
             return
         self.__x_min=self.__x_min-2000
         self.__x_max=self.__x_max-2000
-        self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min,self.__x_max))
+        self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min,self.__x_max))#le lleva la informacion del movimiento a la senal
      
-    def wavelet(self):
+    def wavelet(self): # esta funcion corresponde a la accion del botono del wavelet para llevar la informacion a graficar
         self.__fs = float(int(self.fs.text()))
         
         tiempo, freq, power = self.__coordinador.calcularWavelet(0,self.__fs)
-        self.__sc.graficar_espectro(tiempo, freq, power)
+        self.__sc.graficar_espectro(tiempo, freq, power) #le lleva los parametros del tiempo, frecuencia y potencia
         
-    def welch(self):
-        self.__fm = int(self.frecuencia_w.text())
+    def welch(self): #funcion que lleva la informacion para el welch 
+        self.__fm = int(self.frecuencia_w.text()) # ingreso de valores necesarios
         self.__ta = int(self.tamano.text())
-        self.__so = int(self.solapamiento.text())
+        self.__so = int(self.solapamiento.text()) #ingreso de valores
         self.__po = int(self.potencia.text())
-        f, Pxx = self.__coordinador.calcularWelch(0,self.__fm,self.__ta,self.__so,self.__po)
-        self.__sc2.graficar_analisisw(f,Pxx)
+        f, Pxx = self.__coordinador.calcularWelch(0,self.__fm,self.__ta,self.__so,self.__po) # le envia la informacion necesaria del calculo del welch
+        self.__sc2.graficar_analisisw(f,Pxx) # lleva la informacion del welch para ser graficada 
         
-    def multitaper(self):
-        self.__fmp = int(self.fs_multi.text())
-        self.__ab = int(self.w.text())
-        self.__tam = int(self.T.text())
-        Pxx, f = self.__coordinador.calcularmulti(0,self.__fmp,self.__ab,self.__tam)
-        self.__sc2.graficar_analisisp(Pxx,f)
+    def multitaper(self):#funcion que lleva la informacion para el welch 
+        
+        self.__fmp = int(self.fs_multi.text()) #ingreso de datos necesarios
+        self.__ab = int(self.we.text())
+        self.__tam = int(self.tama.text())
+        self.__inicial = int(self.ini.text())
+        self.__final = int(self.fin.text())
+        Pxx, f = self.__coordinador.calcularmulti(0,self.__fmp,self.__ab,self.__tam,self.__inicial,self.__final) #le envia la informacion necesaria para el calculo del multitaper
+        self.__sc2.graficar_analisisp(Pxx,f) #lleva la informacion para realizar el grafico
     
 
 #signal.welch(x, fs=1.0, window='hann', nperseg=None, noverlap=None, nfft=None, 
@@ -274,7 +278,7 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
     
 
     # La funciÃ³n QFileDialog muestra el cuadro de diÃ¡logo para seleccionar la seÃ±al que se quiere cargar 
-    
+    # esta funcion se encarga de cargar la informacion de la señal 
     
     def cargar_senal(self):
         
@@ -284,63 +288,70 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
             
             print(archivo_cargado)
             data =sio.loadmat(archivo_cargado) # Carga la ruta donde se encuentra guardada la seÃ±al en el computador 
-            print("Los campos cargados son: " + str(data.keys()));
+            print("Los campos cargados son: " + str(data.keys())); #se evalua las claves del diccionario donde esta guardada la senal
             
-            if self.checkojos_abiertos.isChecked():
-                data = np.squeeze(data['ojos_abiertos']);
-                sensores=1
-                ensayos=1
+            if self.checkojos_abiertos.isChecked(): # si se ha seleccionado el nombre que concuerda con la señal necesita , se carga
+                data = np.squeeze(data['ojos_abiertos']);#para volver la señal a una sola dimension
+                
                 puntos = data.shape[0]
                 senal_continua = data
-                self.__coordinador.recibirDatosSenal(data)
+                self.__coordinador.recibirDatosSenal(data) # le da la informacion al coordinador
                 self.__x_min=0
-                self.__x_max=8000
-                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
+                self.__x_max=4000
+                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max)) # se llama la funcion para graficar la señal a cargar
                 
-                #ahora enviandolo al controlador y modelo
             
-                self.boton_adelante.setEnabled(True)
+                self.boton_adelante.setEnabled(True) # para asegurar el orden de los botones al ser seleecionado las opciones
                 self.boton_atras.setEnabled(True)
                 self.checkojos_cerrados.setEnabled(False)
                 self.checkanestesia.setEnabled(False)
             
                 
-            if self.checkojos_cerrados.isChecked():
-                data = np.squeeze(data['ojos_cerrados']);
-                sensores=1
-                ensayos=1
+            if self.checkojos_cerrados.isChecked():  # si se ha seleccionado el nombre que concuerda con la señal necesita , se carga
+                data = np.squeeze(data['ojos_cerrados']); #para volver la señal a una sola dimension
+                
                 puntos = data.shape[0]
                 senal_continua = data
-                self.__coordinador.recibirDatosSenal(data)
+                self.__coordinador.recibirDatosSenal(data) #le da informacion al coordinador 
                 self.__x_min=0
-                self.__x_max=8000
-                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
-                
+                self.__x_max=4000
+                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))# se llama la funcion para graficar la señal a cargar
                 #ahora enviandolo al controlador y modelo
             
-                self.boton_adelante.setEnabled(True)
+                self.boton_adelante.setEnabled(True)# para asegurar el orden de los botones al ser seleecionado las opciones
                 self.boton_atras.setEnabled(True)
                 self.checkojos_abiertos.setEnabled(False)
                 self.checkanestesia.setEnabled(False)
                 
-            if self.checkanestesia.isChecked():
-                data = np.squeeze(data['anestesia']);
-                sensores=1
-                ensayos=1
+            if self.checkanestesia.isChecked():  # si se ha seleccionado el nombre que concuerda con la señal necesita , se carga
+                data = np.squeeze(data['anestesia']);#para volver la señal a una sola dimension
+                
                 puntos = data.shape[0]
                 senal_continua = data
-                self.__coordinador.recibirDatosSenal(data)
+                self.__coordinador.recibirDatosSenal(data) #le envia la informacion al controlador 
                 self.__x_min=0
-                self.__x_max=8000
-                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
+                self.__x_max=4000
+                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))# se llama la funcion para graficar la señal a cargar
                 
                 #ahora enviandolo al controlador y modelo
             
-                self.boton_adelante.setEnabled(True)
+                self.boton_adelante.setEnabled(True)# para asegurar el orden de los botones al ser seleecionado las opciones
                 self.boton_atras.setEnabled(True)
                 self.checkojos_cerrados.setEnabled(False)
                 self.checkojos_abiertos.setEnabled(False)
                 
+            if self.checkojos_abiertos.isChecked()== False:  #con estos condicionales se asegura la posibilidad de solo seleccionar una opcion a la vez
+                self.checkojos_cerrados.setEnabled(True)
+                self.checkanestesia.setEnabled(True)
+                
+            if self.checkojos_cerrados.isChecked()== False:
+                self.checkojos_abiertos.setEnabled(True)
+                self.checkanestesia.setEnabled(True)
+                
+            if self.checkanestesia.isChecked()== False:
+                self.checkojos_cerrados.setEnabled(True)
+                self.checkojos_abiertos.setEnabled(True)
+               
             
                 
              
