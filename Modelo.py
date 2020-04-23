@@ -50,14 +50,16 @@ class Biosenal(object):  # Se crea la clase Biosenal en Modelo
     
     # permite devolver el canal con los xlim del sistema  (limites)
     
-    def calcularWavelet(self,senal):
+    def calcularWavelet(self,data,fs):
+        
+        senal =self.__data[:]
         
         
         #%%analisis usando wavelet continuo
         import pywt #1.1.1
 
         #%%
-        sampling_period =  1/1000
+        sampling_period =  1/fs
         Frequency_Band = [4, 30] # Banda de frecuencia a analizar
         
         # Métodos de obtener las escalas para el Complex Morlet Wavelet  
@@ -85,9 +87,27 @@ class Biosenal(object):  # Se crea la clase Biosenal en Modelo
         return time, freqs, power
         
         
-    def calcularWelch(self,senal):
-        pass
-    def calcularMultitaper(self,senal):
-        pass
+    def calcularWelch(self,data,fm,ta,so,po):
+        
+        senal =self.__data[:]
+        f, Pxx = signal.welch(senal,fm,'hamming', ta, so, po, scaling='density');
+        return f, Pxx
+        
+        
+
+    def calcularMultitaper(self,data,fmp,ab,tam):
+        
+        from chronux.mtspectrumc import mtspectrumc
+        senal =self.__data[:]
+        params = dict(fmp = fmp, fpass = [0, 50], tapers = [ab, tam, 1], trialave = 1)
+        #A numeric vector [W T p] where W is the
+        #bandwidth, T is the duration of the data and p 
+        #is an integer such that 2TW-p tapers are used.
+
+        dato = np.reshape(senal,(fmp*5,10),order='F')
+        #Calculate the spectral power of the data
+        Pxx, f = mtspectrumc(dato, params)
+        return Pxx,f
+        
    
     

@@ -102,8 +102,8 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>620</y>
+      <x>50</x>
+      <y>580</y>
       <width>241</width>
       <height>20</height>
      </rect>
@@ -177,8 +177,8 @@
    <widget class="QLabel" name="label_8">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>630</y>
+      <x>600</x>
+      <y>520</y>
       <width>151</width>
       <height>16</height>
      </rect>
@@ -191,7 +191,7 @@
     <property name="geometry">
      <rect>
       <x>610</x>
-      <y>520</y>
+      <y>560</y>
       <width>151</width>
       <height>16</height>
      </rect>
@@ -204,7 +204,7 @@
     <property name="geometry">
      <rect>
       <x>610</x>
-      <y>580</y>
+      <y>620</y>
       <width>111</width>
       <height>20</height>
      </rect>
@@ -226,40 +226,10 @@
      <string>frecuencia de muestreo:</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="frecuencia_muestreo2">
-    <property name="geometry">
-     <rect>
-      <x>1100</x>
-      <y>460</y>
-      <width>91</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="w">
-    <property name="geometry">
-     <rect>
-      <x>1100</x>
-      <y>520</y>
-      <width>91</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="T">
-    <property name="geometry">
-     <rect>
-      <x>1100</x>
-      <y>580</y>
-      <width>91</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="boton_wavelet">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>330</x>
       <y>620</y>
       <width>93</width>
       <height>28</height>
@@ -298,9 +268,9 @@
    <widget class="QLabel" name="label_13">
     <property name="geometry">
      <rect>
-      <x>610</x>
+      <x>640</x>
       <y>680</y>
-      <width>151</width>
+      <width>91</width>
       <height>16</height>
      </rect>
     </property>
@@ -311,8 +281,8 @@
    <widget class="QLineEdit" name="tamano">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>520</y>
+      <x>770</x>
+      <y>560</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -321,8 +291,8 @@
    <widget class="QLineEdit" name="solapamiento">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>580</y>
+      <x>770</x>
+      <y>620</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -331,8 +301,8 @@
    <widget class="QLineEdit" name="frecuencia_w">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>630</y>
+      <x>770</x>
+      <y>520</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -341,8 +311,8 @@
    <widget class="QLineEdit" name="potencia">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>680</y>
+      <x>770</x>
+      <y>670</y>
       <width>113</width>
       <height>22</height>
      </rect>
@@ -351,8 +321,8 @@
    <widget class="QPushButton" name="boton_gr">
     <property name="geometry">
      <rect>
-      <x>860</x>
-      <y>740</y>
+      <x>720</x>
+      <y>720</y>
       <width>93</width>
       <height>28</height>
      </rect>
@@ -411,6 +381,72 @@
     </property>
     <property name="text">
      <string>anestesia</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="fs">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>630</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>630</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>frecuencia:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="fs_multi">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>460</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="w">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>530</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="T">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>590</y>
+      <width>113</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="boton_mp">
+    <property name="geometry">
+     <rect>
+      <x>1020</x>
+      <y>650</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Graficar</string>
     </property>
    </widget>
   </widget>

@@ -42,11 +42,17 @@ class Coordinador(object):
 
     def devolverDatosSenal(self,x_min,x_max):  # Esta función permite devolver un segmento de acuerdo a los valores mínimos y máximos
         return self.__mi_biosenal.devolver_segmento(x_min,x_max)
-    
 
     
-    #def calcularWavelet(self,data,fs,):
-        #return self.__mi_biosenal.calcularWavelet(se)
+    def calcularWavelet(self,data,fs):
+        return self.__mi_biosenal.calcularWavelet(data,fs)
+    
+    def calcularWelch(self,data,fm,ta,so,po):
+        return self.__mi_biosenal.calcularWelch(data,fm,ta,so,po)
+        
+        
+    def calcularmulti(self,data,fmp,ab,tam):
+        return self.__mi_biosenal.calcularMultitaper(data,fmp,ab,tam)
     
     
     

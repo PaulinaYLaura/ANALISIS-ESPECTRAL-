@@ -31,11 +31,9 @@ import scipy.signal as signal;
 from Modelo import Biosenal # Del archivo Modelo se importa la
 from scipy.fftpack import fft;
 
-import scipy.signal as signal;
+#from chronux.mtspectrumc import mtspectrumc
 
-#from IPython import get_ipython
 
-#  get_ipython().run_line_magic('matplotlib', 'qt')
 
 
 
@@ -51,6 +49,7 @@ class MyGraphCanvas(FigureCanvas):
         #self.fig2= Figure(figsize=(width, height), dpi=dpi)
         #el axes en donde va a estar mi grafico debe estar en mi figura
         self.axes = self.fig.add_subplot(111)
+        
         
         
         #se inicializa la clase FigureCanvas con el objeto fig
@@ -105,13 +104,20 @@ class MyGraphCanvas(FigureCanvas):
         self.axes.set_xlabel('Time [s]')
         self.axes.figure.canvas.draw()#ordenamos que dibuje
         
-    def graficar_analisis(self,f,Pxx):
-        self.axes2.clear()
-        self.axes2.plot(f[(f >= 4) & (f <= 40)],Pxx[(f >= 4) & (f <= 40)])
-        pass
-         
+    def graficar_analisisw(self,f,Pxx):
+        #self.axes.clear()
+        self.axes.plot(f[(f >= 4) & (f <= 40)],Pxx[(f >= 4) & (f <= 40)])
+        self.axes.set_ylabel('frequency [Hz]')
+        self.axes.set_xlabel('Time [s]')
+        self.axes.figure.canvas.draw()#ordenamos que dibuje
+        
+    def graficar_analisisp(self,Pxx,f):
+        
+        self.axes.plot(f[(f >= 4) & (f <= 40)],Pxx[(f >= 4) & (f <= 40)])
+        self.axes.set_ylabel('frequency [Hz]')
+        self.axes.set_xlabel('Time [s]')
+        self.axes.figure.canvas.draw()
 
-    
 #signal.welch(x, fs=1.0, window='hann', nperseg=None, noverlap=None, nfft=None, 
 #detrend='constant', return_onesided=True, scaling='density', axis=-1)
 #f, Pxx = signal.welch(ecg,fs,'hamming', 512*0.5, 256*0.5, 512*0.5, scaling='density');
@@ -157,6 +163,8 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
         self.boton_adelante.clicked.connect(self.adelante_senal) 
         self.boton_atras.clicked.connect(self.atrasar_senal)
         self.boton_wavelet.clicked.connect(self.wavelet)
+        self.boton_gr.clicked.connect(self.welch)
+        self.boton_mp.clicked.connect(self.multitaper)
         
         # El usuario puede escribir el nÃºmero del canal que desee visualizar y da clic en seleccionar canal
         #self.seleccion_canal.clicked.connect(self.graficar_canal) 
@@ -182,7 +190,7 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
         if self.checkWelch.isChecked() == True:
             
             self.checkMulti.setEnabled(False) #por orden y evitar seleccionar las dos opciones al tiempo
-            self.frecuencia_muestreo2.setEnabled(False)
+            self.fs_multi.setEnabled(False)
             self.w.setEnabled(False)
             self.T.setEnabled(False)
            
@@ -198,7 +206,7 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
         if self.checkWelch.isChecked() == False:
             
             self.checkMulti.setEnabled(True)
-            self.frecuencia_muestreo2.setEnabled(True)
+            self.fs_multi.setEnabled(True)
             self.w.setEnabled(True)
             self.T.setEnabled(True)
             
@@ -240,13 +248,31 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
         self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min,self.__x_max))
      
     def wavelet(self):
+        self.__fs = float(int(self.fs.text()))
         
-        tiempo, freq, power = self.__coordinador.calcularWavelet(0)
+        tiempo, freq, power = self.__coordinador.calcularWavelet(0,self.__fs)
         self.__sc.graficar_espectro(tiempo, freq, power)
+        
+    def welch(self):
+        self.__fm = int(self.frecuencia_w.text())
+        self.__ta = int(self.tamano.text())
+        self.__so = int(self.solapamiento.text())
+        self.__po = int(self.potencia.text())
+        f, Pxx = self.__coordinador.calcularWelch(0,self.__fm,self.__ta,self.__so,self.__po)
+        self.__sc2.graficar_analisisw(f,Pxx)
+        
+    def multitaper(self):
+        self.__fmp = int(self.fs_multi.text())
+        self.__ab = int(self.w.text())
+        self.__tam = int(self.T.text())
+        Pxx, f = self.__coordinador.calcularmulti(0,self.__fmp,self.__ab,self.__tam)
+        self.__sc2.graficar_analisisp(Pxx,f)
     
+
+#signal.welch(x, fs=1.0, window='hann', nperseg=None, noverlap=None, nfft=None, 
+#detrend='constant', return_onesided=True, scaling='density', axis=-1)  
     
-#se necesita organizar que cargue cualquier tipo de senal .mat, para ello se necesita  ser cuidadoso con los diccionarios con la longitud 
-#y las dimensiones 
+
     # La funciÃ³n QFileDialog muestra el cuadro de diÃ¡logo para seleccionar la seÃ±al que se quiere cargar 
     
     
@@ -268,7 +294,7 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
                 senal_continua = data
                 self.__coordinador.recibirDatosSenal(data)
                 self.__x_min=0
-                self.__x_max=2000
+                self.__x_max=8000
                 self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
                 
                 #ahora enviandolo al controlador y modelo
@@ -277,6 +303,7 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
                 self.boton_atras.setEnabled(True)
                 self.checkojos_cerrados.setEnabled(False)
                 self.checkanestesia.setEnabled(False)
+            
                 
             if self.checkojos_cerrados.isChecked():
                 data = np.squeeze(data['ojos_cerrados']);
@@ -286,7 +313,7 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
                 senal_continua = data
                 self.__coordinador.recibirDatosSenal(data)
                 self.__x_min=0
-                self.__x_max=2000
+                self.__x_max=8000
                 self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
                 
                 #ahora enviandolo al controlador y modelo
@@ -304,7 +331,7 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces grÃ
                 senal_continua = data
                 self.__coordinador.recibirDatosSenal(data)
                 self.__x_min=0
-                self.__x_max=2000
+                self.__x_max=8000
                 self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
                 
                 #ahora enviandolo al controlador y modelo
