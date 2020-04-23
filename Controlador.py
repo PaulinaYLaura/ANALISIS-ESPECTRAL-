@@ -10,6 +10,13 @@ from interfaz import Interfaz  # Se importa la clase interfaz del archivo llamad
 import sys  # # Librería que proporciona parámetros y funciones específicas del sistema
 from PyQt5.QtWidgets import QApplication  
 # Se importa el módulo QApplication para pueda funcionar todos los programas relacionados con la interfaz
+#library to load mat files
+import scipy.io as sio;
+import matplotlib.pyplot as plt;
+import numpy as np;
+
+
+
 
 class Principal(object): 
     def __init__(self):        
@@ -31,12 +38,17 @@ class Coordinador(object):
         
     def recibirDatosSenal(self,data):  # Esta función permite asignarle los datos de la señal continua al Modelo 
         self.__mi_biosenal.asignarDatos(data)
-        
+    
+
     def devolverDatosSenal(self,x_min,x_max):  # Esta función permite devolver un segmento de acuerdo a los valores mínimos y máximos
         return self.__mi_biosenal.devolver_segmento(x_min,x_max)
     
-    def devolver_canal(self,c,xmin,xmax):
-        return self.__mi_biosenal.devolver_canal(c,xmin, xmax)
+
+    
+    #def calcularWavelet(self,data,fs,):
+        #return self.__mi_biosenal.calcularWavelet(se)
+    
+    
     
 p=Principal()
 p.main()

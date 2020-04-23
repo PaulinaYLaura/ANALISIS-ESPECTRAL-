@@ -22,13 +22,21 @@ from numpy import arange, sin, pi
 
 #contenido para graficos de matplotlib
 from matplotlib.backends. backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import csv # Librería que ayuda 
+
 import scipy.io as sio  # Librería científica que soporta la carga de multiples tipos de archivos
 import numpy as np # librería que permite trabajar con arrays
 import matplotlib.pyplot as plt;
 import scipy.signal as signal;
-import matplotlib.pyplot as plt;
-from Modelo import Biosenal # Del archivo Modelo se importa la  
+
+from Modelo import Biosenal # Del archivo Modelo se importa la
+from scipy.fftpack import fft;
+
+import scipy.signal as signal;
+
+#from IPython import get_ipython
+
+#  get_ipython().run_line_magic('matplotlib', 'qt')
+
 
 
 
@@ -48,53 +56,70 @@ class MyGraphCanvas(FigureCanvas):
         #se inicializa la clase FigureCanvas con el objeto fig
         FigureCanvas.__init__(self,self.fig)
         
-    def __init2__(self,parent= None,width=3, height=3, dpi=90):
+    def __init2__(self, parent= None,width=5, height=4, dpi=100):
         
-        self.fig2= Figure(figsize=(width, height), dpi=dpi)
-        self.axes2= self.fig.add_subplot(211)
+        #se crea un objeto figura
+        self.fig2 = Figure(figsize=(width, height), dpi=dpi)
+        #self.fig2= Figure(figsize=(width, height), dpi=dpi)
+        #el axes en donde va a estar mi grafico debe estar en mi figura
         
+        self.axes2 = self.fig2.add_subplot(121)
+        
+        #se inicializa la clase FigureCanvas con el objeto fig
         FigureCanvas.__init2__(self,self.fig2)
-  
-#segundo espacio para graficar el espectro      
-    def graficar_espectro(self,datos):
-        
-        self.axes2.clear()
-        self.axes2.subplot(datos)
-        self.axes2.set_xlabel("Tiempo")
-        self.axes2.set_ylabel("Amplitud")
-        self.axes2.figure.canvas.draw()
-        
-        pass
         
     
-   
+        
+    #Se ingresan los datos a graficar y se grafican
+
+ #Se grafican las señales en un mismo plano de forma que no queden superpuestas, 
+ #cuando se utiliza plot las señales quedan en la misma gráfica
+ 
     # Se crea un metodo para graficar lo que se desee
+        
     def graficar_senal(self,datos):
-        # primero se necesita limpiar la grafica anterior
         self.axes.clear()
         #Se ingresan los datos a graficar y se grafican
-    
- #Se grafican las señales en un mismo plano de forma que no queden superpuestas, cuando se utiliza plot las señales quedan en la misma gráfica
-        if datos.ndim==1: # Si la señal es de una dimensión, se grafica la señal
-            self.axes.plot(datos)
-            print("datos")
-            print(datos)
-            
-#Si la señal es de múltiples dimensiones entonces se conoce cuantos canales tiene la señal mediante mediante la función shape 
-#y se grafican todos los canales
-          
-        else: 
-            DC=14
-            for canal in range(datos.shape[0]):
-                self.axes.plot(datos[canal,:] + DC*canal) # Grafica todos los canales
-       
-        
-        self.axes.set_xlabel("Tiempo") # Al eje x se le asigna el nombre Tiempo
+        self.axes.plot(datos)
+        print("datos")
+        print(datos)
+   
+        self.axes.set_xlabel("Muestras") # Al eje x se le asigna el nombre muestras
         self.axes.set_ylabel("Amplitud") # Al eje y se le asigna el nombre amplitud
         #self.axes.set
         
         self.axes.figure.canvas.draw() # Se da la indidicación de que se dibuje la figura
         
+        
+        
+        
+    def graficar_espectro(self,time, freqs, power):
+        self.axes.clear()
+        self.axes.contourf(time,
+                 freqs[(freqs >= 4) & (freqs <= 40)],
+                 power[(freqs >= 4) & (freqs <= 40),:],
+                 20, # Especificar 20 divisiones en las escalas de color 
+                 extend='both')
+        print("datos")
+        self.axes.set_ylabel('frequency [Hz]')
+        self.axes.set_xlabel('Time [s]')
+        self.axes.figure.canvas.draw()#ordenamos que dibuje
+        
+    def graficar_analisis(self,f,Pxx):
+        self.axes2.clear()
+        self.axes2.plot(f[(f >= 4) & (f <= 40)],Pxx[(f >= 4) & (f <= 40)])
+        pass
+         
+
+    
+#signal.welch(x, fs=1.0, window='hann', nperseg=None, noverlap=None, nfft=None, 
+#detrend='constant', return_onesided=True, scaling='density', axis=-1)
+#f, Pxx = signal.welch(ecg,fs,'hamming', 512*0.5, 256*0.5, 512*0.5, scaling='density');
+
+   
+    
+        
+                 
        
 class Interfaz(QMainWindow): # Clase que se define para crear las interfaces gráficas, ventana principal
     #constructor
@@ -112,48 +137,90 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces gr�
         #esta clase permite añadir widget uno encima del otro (vertical)
         layout = QVBoxLayout()
         layout2 = QVBoxLayout()
+        
         #se añade el organizador al campo grafico
         self.campo_graficacion.setLayout(layout)
-        self.campo_filtrada.setLayout(layout2)
+        self.campo_w.setLayout(layout2)
+        
         #se crea un objeto para manejo de graficos
         self.__sc = MyGraphCanvas(self.campo_graficacion, width=5, height=4, dpi=100)
-        self.__sc2 = MyGraphCanvas(self.campo_filtrada, width=5, height=4, dpi=100)
+        self.__sc2 = MyGraphCanvas(self.campo_w, width=5, height=4, dpi=100)
+        
         #se añade el campo de graficos
         layout.addWidget(self.__sc)
         layout2.addWidget(self.__sc2)
+        
         
         #se organizan las señales 
         self.boton_cargarsenal.clicked.connect(self.cargar_senal)  # El usuario puede dar click sobre el botón para cargar la señal
         #El botón desplazamiento en el tiempo tiene la opción de adelantar o atrasar la señal cargada
         self.boton_adelante.clicked.connect(self.adelante_senal) 
         self.boton_atras.clicked.connect(self.atrasar_senal)
+        self.boton_wavelet.clicked.connect(self.wavelet)
         
         # El usuario puede escribir el número del canal que desee visualizar y da clic en seleccionar canal
-        self.seleccion_canal.clicked.connect(self.graficar_canal) 
-        self.campo.setValidator(QIntValidator(0,10))  # Se asigna un QInt Validator para que se tomen canales entre 0 y 10
+        #self.seleccion_canal.clicked.connect(self.graficar_canal) 
+        #self.campo.setValidator(QIntValidator(0,10))  # Se asigna un QInt Validator para que se tomen canales entre 0 y 10
          
  #Los botones adelantar y atrasar señal asociados al desplazamiento de la señal no se habilitan si la señal no esta cargada
-        self.boton_adelante.setEnabled(False)
-        self.boton_atras.setEnabled(False)
-        self.seleccion_canal.setEnabled(False) 
+        self.boton_adelante.setEnabled(True)
+        self.boton_atras.setEnabled(True)
+        
         # El botón seleccionar canal no esta disponible si el usuario no ha cargado la señal
         
-
+        #los botones, checkbox y combobox para el analisis espectral
+        self.checkWelch.stateChanged.connect(self.cambio)
+        self.checkMulti.stateChanged.connect(self.cambio)
+       
+        self.tipo_ventana.addItem("hamming")
+        
     
+        
+    
+    def cambio(self):
+        
+        if self.checkWelch.isChecked() == True:
             
+            self.checkMulti.setEnabled(False) #por orden y evitar seleccionar las dos opciones al tiempo
+            self.frecuencia_muestreo2.setEnabled(False)
+            self.w.setEnabled(False)
+            self.T.setEnabled(False)
+           
+        
+        if self.checkMulti.isChecked() == True:
+            
+            self.checkWelch.setEnabled(False)
+            self.tipo_ventana.setEnabled(False)
+            self.tamano.setEnabled(False)
+            self.solapamiento.setEnabled(False)
+            self.frecuencia_w.setEnabled(False)
+            
+        if self.checkWelch.isChecked() == False:
+            
+            self.checkMulti.setEnabled(True)
+            self.frecuencia_muestreo2.setEnabled(True)
+            self.w.setEnabled(True)
+            self.T.setEnabled(True)
+            
+        if self.checkMulti.isChecked() == False:
+            
+            self.checkWelch.setEnabled(True)
+            self.tipo_ventana.setEnabled(True)
+            self.tamano.setEnabled(True)
+            self.solapamiento.setEnabled(True)
+            self.frecuencia_w.setEnabled(True)
+        
    
         
             
         
        
-    def graficar_canal(self): # Función que selecciona el canal
-        canal = int (self.campo.text())  # se ingresa el canal en el campo canal. Ese campo es una cadena entonces debe convertirse en entero
+    #def graficar_canal(self): # Función que selecciona el canal
+        #canal = int (self.campo.text())  # se ingresa el canal en el campo canal. Ese campo es una cadena entonces debe convertirse en entero
         
-        self.__sc.graficar_senal(self.__coordinador.devolver_canal(canal,self.__x_min,self.__x_max))
+        #self.__sc.graficar_senal(self.__coordinador.devolver_canal(canal,self.__x_min,self.__x_max))
             
-        self.boton_cargarsenal.setEnabled(True)
-        self.boton_adelante.setEnabled(False)  # Se deshabilitan los botones de desplzamiento de la señal a la hora de graficar el canal
-        self.boton_atras.setEnabled(False)
+        
       
         
         #cuando se cargue la señal se debe volver a habilitarlos
@@ -171,46 +238,99 @@ class Interfaz(QMainWindow): # Clase que se define para crear las interfaces gr�
         self.__x_min=self.__x_min-2000
         self.__x_max=self.__x_max-2000
         self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min,self.__x_max))
+     
+    def wavelet(self):
         
-        
-#se necesita organizar que cargue cualquier tipo de senal .mat, para ello se necesita programaar y ser cuidadoso con los diccionarios con la longitud 
+        tiempo, freq, power = self.__coordinador.calcularWavelet(0)
+        self.__sc.graficar_espectro(tiempo, freq, power)
+    
+    
+#se necesita organizar que cargue cualquier tipo de senal .mat, para ello se necesita  ser cuidadoso con los diccionarios con la longitud 
 #y las dimensiones 
+    # La función QFileDialog muestra el cuadro de diálogo para seleccionar la señal que se quiere cargar 
+    
     
     def cargar_senal(self):
-    # La función QFileDialog muestra el cuadro de diálogo para seleccionar la señal que se quiere cargar 
+        
         archivo_cargado, _ = QFileDialog.getOpenFileName(self,"Abrir senal", "","Todos los archivos(*);;Archivos mat(*.mat)");
         
-        if archivo_cargado !="" and archivo_cargado.endswith(".mat"): # Para poder cargar la señal este debe ser de formato .mat
+        if archivo_cargado !="" and archivo_cargado.endswith(".mat"):
+            
             print(archivo_cargado)
-            data=sio.loadmat(archivo_cargado) # Carga la ruta donde se encuentra guardada la señal en el computador 
+            data =sio.loadmat(archivo_cargado) # Carga la ruta donde se encuentra guardada la señal en el computador 
             print("Los campos cargados son: " + str(data.keys()));
-            data = np.squeeze(data['data']); # Vector donde se almacena la señal
             
-            #data = data["data"] # El archivo .mat contiene un campo data en el cual se encuentra la señal
- # El data que contiene la señal es tridimimensional, contiene sensores, puntos y ensayos. Si la señal es bidimensional se arroja un error
-            sensores,puntos,ensayos=data.shape # Sensores: filas, Puntos: columnas, ensayos: matrices 
-            senal_continua=np.reshape(data,(sensores,puntos*ensayos),order="F") # Se genera una señal continua
+            if self.checkojos_abiertos.isChecked():
+                data = np.squeeze(data['ojos_abiertos']);
+                sensores=1
+                ensayos=1
+                puntos = data.shape[0]
+                senal_continua = data
+                self.__coordinador.recibirDatosSenal(data)
+                self.__x_min=0
+                self.__x_max=2000
+                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
+                
+                #ahora enviandolo al controlador y modelo
             
- #el coordinador, el cual puede encontrarse ene l controlador se encarga de recibir y guardar la señal en su propio .py, 
- #por eso no se requiere una variable que lo guarde en el .py interfaz
-            self.__coordinador.recibirDatosSenal(senal_continua)
-            self.__x_min = 0 
-# xmin y xmax son variables que permiten al usuario mover la señal entre 0 y 2000 puntos, están asociadas a,los botones de desplazamiento
-            self.__x_max = 2000
-            #graficar utilizando el controlador
-            self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min,self.__x_max))  # Se grafica la señal y se tiene en cuenta los limites establecidos
-            self.boton_adelante.setEnabled(True)
-            self.boton_atras.setEnabled(True)
-            self.seleccion_canal.setEnabled(True)
-    
-#        
+                self.boton_adelante.setEnabled(True)
+                self.boton_atras.setEnabled(True)
+                self.checkojos_cerrados.setEnabled(False)
+                self.checkanestesia.setEnabled(False)
+                
+            if self.checkojos_cerrados.isChecked():
+                data = np.squeeze(data['ojos_cerrados']);
+                sensores=1
+                ensayos=1
+                puntos = data.shape[0]
+                senal_continua = data
+                self.__coordinador.recibirDatosSenal(data)
+                self.__x_min=0
+                self.__x_max=2000
+                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
+                
+                #ahora enviandolo al controlador y modelo
+            
+                self.boton_adelante.setEnabled(True)
+                self.boton_atras.setEnabled(True)
+                self.checkojos_abiertos.setEnabled(False)
+                self.checkanestesia.setEnabled(False)
+                
+            if self.checkanestesia.isChecked():
+                data = np.squeeze(data['anestesia']);
+                sensores=1
+                ensayos=1
+                puntos = data.shape[0]
+                senal_continua = data
+                self.__coordinador.recibirDatosSenal(data)
+                self.__x_min=0
+                self.__x_max=2000
+                self.__sc.graficar_senal(self.__coordinador.devolverDatosSenal(self.__x_min, self.__x_max))
+                
+                #ahora enviandolo al controlador y modelo
+            
+                self.boton_adelante.setEnabled(True)
+                self.boton_atras.setEnabled(True)
+                self.checkojos_cerrados.setEnabled(False)
+                self.checkojos_abiertos.setEnabled(False)
+                
+            
+                
+             
+                    
+                
+                        
+            
+            
+            
+                
+                
+
 #app=QApplication(sys.argv)
 #mi_ventana = InterfazGrafico()
 #sys.exit(app.exec_()) 
-#               
-        
-        
-        
+             
+
         
         
         
